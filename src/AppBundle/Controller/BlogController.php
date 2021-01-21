@@ -66,7 +66,8 @@ class BlogController extends Controller
         }
 
         return $this->render('blog/new.html.twig', [
-            'form' => $form->createView(),
+          'post' => $post,
+          'form' => $form->createView(),
         ]);
     }
 
@@ -88,6 +89,43 @@ class BlogController extends Controller
         $em->flush();
 
         return $this->redirectToRoute('blog_index');
+    }
+
+    /**
+     * @Route("/{id}/edit", name="blog_edit", requirements={"id"="\d+"})
+     */
+    public function editAction(Request $request, $id)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $post = $em->getRepository(Post::class)->find($id);
+        if (!$post) {
+            throw $this->createNotFoundException(
+                'No post found for id '.$id
+            );
+        }
+        
+        // フォーム組立
+        $form = $this->createFormBuilder($post)
+            ->add('title')
+            ->add('content')
+            ->getForm();
+
+        $form->handleRequest($request);
+        
+        // 更新
+        if ($form->isSubmitted() && $form->isValid()) {
+            // フォームから送信されてきた値と一緒に更新日時も更新して保存
+            $post->setUpdatedAt(new \DateTime());
+            $em->flush();
+
+            return $this->redirectToRoute('blog_index');
+        }
+
+        // 新規作成するときと同じテンプレートを利用
+        return $this->render('blog/new.html.twig', [
+            'post' => $post,
+            'form' => $form->createView(),
+        ]);
     }
 
 }
