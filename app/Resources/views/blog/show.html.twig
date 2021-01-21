@@ -2,3 +2,5 @@
 <h1>{{ post.title }}</h1>
 <p><small>Created: {{ post.createdAt|date('Y/m/d H:i') }}</small></p>
 <p>{{ post.content|nl2br }}</p>
+{# 戻るリンクを追加 #}
+<p><a href="{{ path('blog_index') }}">一覧に戻る</a></p>
